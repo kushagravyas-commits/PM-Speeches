@@ -49,6 +49,19 @@ sheets_auth_inspect.py
 upload_speech_rows_oauth.py
 verify_sheet.py
 
+# Old/experimental scraper variants and local maintenance scripts
+debug_mongo.py
+extract_speech.py
+extract_speech_mongodb.py
+extract_speech_url.py
+extract_speech_url_SB.py
+extract_speech_url_playwright.py
+extract_speech_url_selenium.py
+fix_mongo_indexes.py
+playwright_url.py
+scheduler.py
+word_search.py
+
 # Report generators, outputs, and archives
 report-making/
 dynamic report making/

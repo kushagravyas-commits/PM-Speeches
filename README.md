@@ -1,13 +1,10 @@
 # PM Speeches
 
-Utilities for collecting Prime Minister speech transcript URLs from narendramodi.in, extracting speech text/media metadata, and searching/counting words across stored speeches.
+Working scraper used to collect Prime Minister speech transcript URLs from narendramodi.in into MongoDB.
 
-## Main Workflows
+## Main Workflow
 
 - `extract_speech_url_range_playwright.py` collects transcript URLs for a date range and stores them in MongoDB.
-- `extract_speech_mongodb.py` visits transcript URLs and stores speech title, date, text, images, videos, and tweets in MongoDB.
-- `word_search.py` searches stored speeches for a keyword and exports JSON/CSV results.
-- `scheduler.py` contains the older Prefect automation for scheduled extraction runs.
 
 ## Local Setup
 
