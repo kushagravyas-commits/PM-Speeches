@@ -1,0 +1,20 @@
+# Core DB + env
+pymongo>=4.6.0
+dnspython>=2.4.0
+python-dotenv>=1.0.0
+python-dateutil>=2.8.2
+dotenv
+# Scraping / browser automation
+seleniumbase>=4.25.0
+selenium
+# Language detection (used as fallback)
+langdetect>=1.0.9
+
+# Orchestration / scheduling
+prefect==3.6.16
+pydantic>=2.10,<3
+pydantic-settings>=2.0,<3
+
+# Optional: only if you use a Playwright-based collector again
+playwright>=1.40.0
+urllib3

@@ -1,0 +1,48 @@
+# Secrets and local auth
+.env
+credentials.json
+token.json
+token_*.json
+*service_account*.json
+lucky-airship-*.json
+
+# Python/runtime
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Browser/download/runtime artifacts
+downloaded_files/
+pages/
+*.log
+headers.txt
+debug_mongo_out.txt
+jina_*.txt
+
+# Generated extraction data and sheet exports
+speeches.json
+speech_urls*.json
+speech_sheet_*.json
+speech_sheet_*.csv
+speech_page_details_fast.json
+recent_speech_details_cache.json
+filled_2026_for_sheet.tsv
+results.tsv
+worklist*.tsv
+missing_*.txt
+failed_speeches.json
+word_search_results_*.json
+word_search_results_*.csv
+
+# Report outputs and archives
+report-making.zip
+report-making/outputs/
+report-making/src/outputs/
+dynamic report making/dist/
+dynamic report making/*.json
+
+# Local agent/editor state
+.claude/
+.agents/
+.codex/

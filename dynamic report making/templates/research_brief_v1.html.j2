@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ cover.title }}</title>
+
+  <!-- Vega stack for dynamic charts (no PNGs) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+  <style>
+    :root{
+      --paper:#ffffff;
+      --ink:#0b1220;
+      --muted:#475569;
+      --muted2:#64748b;
+      --line:#e2e8f0;
+      --soft:#f8fafc;
+
+      --accent:#2563eb;
+      --accent2:#22c55e;
+
+      --shadow: 0 12px 40px rgba(2,6,23,.10);
+      --shadow2: 0 18px 60px rgba(2,6,23,.14);
+
+      --max: 1100px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1000px 520px at 15% -10%, rgba(37,99,235,.25), transparent 60%),
+        radial-gradient(900px 520px at 85% -10%, rgba(34,197,94,.18), transparent 55%),
+        linear-gradient(180deg, #f8fafc 0%, #f1f5f9 35%, #f8fafc 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+
+    .wrap{max-width:var(--max); margin:0 auto; padding:28px 16px 70px;}
+
+    /* Header (hero) */
+    .hero{
+      position:relative;
+      border-radius:22px;
+      padding:24px;
+      background:
+        linear-gradient(135deg, rgba(37,99,235,.12), rgba(34,197,94,.10)),
+        radial-gradient(900px 400px at 20% 0%, rgba(37,99,235,.10), transparent 60%),
+        radial-gradient(900px 400px at 80% 0%, rgba(34,197,94,.08), transparent 60%),
+        #ffffff;
+      border:1px solid rgba(226,232,240,.9);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: linear-gradient(90deg, rgba(37,99,235,.35), rgba(34,197,94,.25));
+      filter: blur(24px);
+      opacity:.35;
+      z-index:0;
+    }
+    .hero > *{position:relative; z-index:1}
+
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.8);
+    }
+    .title{
+      margin:14px 0 0;
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.02em;
+      line-height:1.1;
+    }
+    .subtitle{
+      margin:10px 0 0;
+      color:var(--muted);
+      line-height:1.45;
+      max-width: 75ch;
+    }
+    .metaRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+      color:var(--muted2);
+      font-size:12px;
+    }
+    .metaRow b{color:#0f172a}
+
+    .card{
+      background:var(--paper);
+      border:1px solid rgba(226,232,240,.9);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: var(--shadow);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover{transform: translateY(-2px); box-shadow: var(--shadow2);}
+
+    .layout{display:grid; grid-template-columns: 300px 1fr; gap:16px; margin-top:16px}
+    @media (max-width: 980px){ .layout{grid-template-columns: 1fr} .toc{position:static !important} }
+
+    /* TOC */
+    .toc{position:sticky; top:16px; align-self:start; padding:16px}
+    .tocTitle{
+      margin:0 0 10px;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      color:var(--muted);
+    }
+    .toc a{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      text-decoration:none;
+      color:#0f172a;
+      font-size:13px;
+      padding:8px 10px;
+      border-radius:12px;
+      transition: background .15s ease;
+    }
+    .toc a:hover{background:#f1f5f9}
+    .tocNum{min-width:34px; color:var(--muted2); font-variant-numeric: tabular-nums;}
+    .tocText{flex:1}
+
+    /* Sections */
+    .sec{margin-bottom:16px}
+    .secTitle{
+      margin:0 0 10px;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:-.01em;
+    }
+
+    details{
+      border:1px solid rgba(226,232,240,.9);
+      border-radius:16px;
+      padding:12px;
+      background: #fff;
+    }
+    summary{cursor:pointer; font-weight:800; color:#0f172a}
+    summary::marker{color:var(--accent)}
+
+    /* Reveal animation */
+    .reveal{opacity:0; transform: translateY(10px); transition: opacity .55s ease, transform .55s ease;}
+    .reveal.in{opacity:1; transform: translateY(0);}
+
+    /* These classes are used by _rb_macros.html.j2 */
+    .h3{margin:14px 0 6px; font-size:15px; font-weight:900}
+    .h4{margin:14px 0 6px; font-size:13px; font-weight:900; color:#0f172a}
+    .para{
+      margin:10px 0 0;
+      color:#0f172a;
+      line-height:1.75;
+      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+      max-width: 78ch;
+    }
+    .bullets{
+      margin:10px 0 0 18px;
+      color:#0f172a;
+      line-height:1.7;
+      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+      max-width: 78ch;
+    }
+    .bullets li{margin:7px 0}
+
+    .kpiRow{display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:10px; margin-top:10px}
+    @media (max-width: 760px){ .kpiRow{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    .kpi{
+      border:1px solid rgba(226,232,240,.9);
+      border-radius:14px;
+      padding:12px;
+      background: linear-gradient(180deg, rgba(248,250,252,.9), rgba(255,255,255,1));
+    }
+    .kpiLabel{font-size:11px; color:var(--muted2)}
+    .kpiValue{margin-top:4px; font-size:18px; font-weight:900; letter-spacing:-.01em}
+
+    .figure{
+      margin:14px 0;
+      border:1px solid rgba(226,232,240,.9);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .caption{margin-top:8px; font-size:12px; color:var(--muted2)}
+    .chart{
+      min-height: 280px;
+      border-radius: 14px;
+      border: 1px solid rgba(226,232,240,.9);
+      background:
+        linear-gradient(180deg, rgba(248,250,252,.95), rgba(255,255,255,1));
+      position:relative;
+      overflow:hidden;
+    }
+    .chart::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(500px 240px at 20% 0%, rgba(37,99,235,.10), transparent 60%),
+        radial-gradient(500px 240px at 80% 0%, rgba(34,197,94,.08), transparent 60%);
+      pointer-events:none;
+    }
+    .chartMissing{display:flex; align-items:center; justify-content:center}
+    .chartMissingText{font-size:12px; color:var(--muted2)}
+    .img{width:100%; height:auto; border-radius:12px}
+
+    .tableHeader{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:12px 0 6px}
+    .tableTag{
+      font-size:12px;
+      font-weight:900;
+      color:#0f172a;
+      background:#f1f5f9;
+      border:1px solid rgba(226,232,240,.9);
+      padding:6px 10px;
+      border-radius:999px;
+    }
+    .tableNote{font-size:12px; color:var(--muted2)}
+    .tableWrap{
+      border:1px solid rgba(226,232,240,.9);
+      border-radius:16px;
+      overflow:auto;
+      background:#fff;
+    }
+    .tbl{width:100%; border-collapse:collapse; font-size:13px}
+    .tbl th, .tbl td{padding:10px 10px; border-bottom:1px solid rgba(226,232,240,.8); vertical-align:top}
+    .tbl th{
+      background:#f8fafc;
+      text-align:left;
+      font-weight:900;
+      color:#334155;
+      position:sticky; top:0;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tbl tr:hover td{background:#fafcff}
+
+    .themeCard{
+      margin-top:14px;
+      border:1px solid rgba(226,232,240,.9);
+      border-radius:18px;
+      padding:14px;
+      background: linear-gradient(135deg, rgba(37,99,235,.06), rgba(34,197,94,.04), #fff);
+    }
+    .themeTag{
+      display:inline-block;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      color:var(--muted2);
+      border:1px solid rgba(226,232,240,.9);
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.85);
+    }
+    .themeTitle{margin:10px 0 0; font-size:16px; font-weight:900; letter-spacing:-.01em}
+
+    .footer{margin-top:16px; text-align:center; color:var(--muted2); font-size:12px}
+  </style>
+</head>
+
+<body>
+  {% set ns = namespace(fig=0, tbl=0) %}
+  {% import "_rb_macros.html.j2" as ui %}
+
+  <div class="wrap">
+    <header class="hero reveal">
+      <div class="pill">Research Brief v1 • Auto-generated</div>
+      <h1 class="title">{{ cover.title }}</h1>
+      {% if cover.subtitle %}<div class="subtitle">{{ cover.subtitle }}</div>{% endif %}
+      <div class="metaRow">
+        <span>Keyword: <b>{{ cover.keyword }}</b></span>
+        <span>Window: <b>{{ cover.window.start_date }}</b> → <b>{{ cover.window.end_date }}</b></span>
+        <span>Date: <b>{{ cover.date }}</b></span>
+        <span>Speeches: <b>{{ cover.totals.speeches }}</b></span>
+        <span>Mentions: <b>{{ cover.totals.mentions }}</b></span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="card toc reveal">
+        <div class="tocTitle">Contents</div>
+        {% for s in sections %}
+          <a href="#sec-{{ s.key }}">
+            <div class="tocNum">{{ s.key }}.</div>
+            <div class="tocText">{{ s.title }}</div>
+          </a>
+        {% endfor %}
+        <a href="#appendix">
+          <div class="tocNum">A.</div>
+          <div class="tocText">Appendix</div>
+        </a>
+      </nav>
+
+      <main>
+        {% for s in sections %}
+          <section class="card sec reveal" id="sec-{{ s.key }}">
+            <h2 class="secTitle">{{ s.key }}. {{ s.title }}</h2>
+
+            {% if s.collapsed %}
+              <details>
+                <summary>Open section</summary>
+                <div style="margin-top:10px">
+                  {{ ui.render_section(s, ns) }}
+                </div>
+              </details>
+            {% else %}
+              {{ ui.render_section(s, ns) }}
+            {% endif %}
+          </section>
+        {% endfor %}
+
+        <section class="card sec reveal" id="appendix">
+          <h2 class="secTitle">Appendix</h2>
+          <details>
+            <summary>Open appendix</summary>
+            <div style="margin-top:10px">
+              {% for b in appendix.blocks %}
+                {{ ui.render_block(b, ns) }}
+              {% endfor %}
+              <div class="footer">
+                Generated at: {{ meta.generated_at }} • Version: {{ meta.version }}
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <div class="footer">Rendered as a static report page with dynamic charts.</div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Embedded visual specs -->
+  <script id="__VISUALS__" type="application/json">{{ visuals_json | safe }}</script>
+
+  <script>
+    // Reveal animation
+    (function(){
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("in"); });
+      }, { threshold: 0.08 });
+      document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+    })();
+
+    // Sortable tables
+    (function(){
+      function parseVal(v){
+        const s = (v ?? "").toString().trim();
+        const n = Number(s.replace(/,/g,""));
+        if (!isNaN(n) && s !== "") return {t:"n", v:n};
+        return {t:"s", v:s.toLowerCase()};
+      }
+
+      document.querySelectorAll("table[data-sortable='true']").forEach(tbl => {
+        const ths = tbl.querySelectorAll("thead th");
+        ths.forEach((th, idx) => {
+          let dir = 1;
+          th.addEventListener("click", () => {
+            const tbody = tbl.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            rows.sort((a,b) => {
+              const av = parseVal(a.children[idx]?.textContent);
+              const bv = parseVal(b.children[idx]?.textContent);
+              if (av.t === "n" && bv.t === "n") return (av.v - bv.v) * dir;
+              if (av.v < bv.v) return -1 * dir;
+              if (av.v > bv.v) return  1 * dir;
+              return 0;
+            });
+            dir *= -1;
+            rows.forEach(r => tbody.appendChild(r));
+          });
+        });
+      });
+    })();
+
+    // Render Vega-Lite charts
+    (async function(){
+      const raw = document.getElementById("__VISUALS__")?.textContent || "{}";
+      let visuals = {};
+      try { visuals = JSON.parse(raw); } catch(e) { visuals = {}; }
+
+      const nodes = document.querySelectorAll(".chart[data-visual-id]");
+      for (const el of nodes) {
+        const vid = el.getAttribute("data-visual-id");
+        const v = visuals[vid];
+
+        if (!v || !v.spec) {
+          el.classList.add("chartMissing");
+          el.innerHTML = '<div class="chartMissingText">No chart spec found for <b>' + vid + '</b></div>';
+          continue;
+        }
+
+        try {
+          await vegaEmbed(el, v.spec, { actions: false, renderer: "canvas" });
+        } catch (err) {
+          el.classList.add("chartMissing");
+          el.innerHTML = '<div class="chartMissingText" style="color:#ef4444">Chart render failed: <b>' + vid + '</b></div>';
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
