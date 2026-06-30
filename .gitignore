@@ -35,12 +35,24 @@ failed_speeches.json
 word_search_results_*.json
 word_search_results_*.csv
 
-# Report outputs and archives
+# One-off Google Sheets/export/backfill helpers
+backfill_recent_speech_details_batch.py
+build_speech_sheet_rows_fast.py
+fetch_speeches.sh
+fill_sheet.py
+fill_sheet_from_csv.py
+google_sheet_pop.py
+inspect_speeches.py
+merge_results.py
+populate_speech_sheet.py
+sheets_auth_inspect.py
+upload_speech_rows_oauth.py
+verify_sheet.py
+
+# Report generators, outputs, and archives
+report-making/
+dynamic report making/
 report-making.zip
-report-making/outputs/
-report-making/src/outputs/
-dynamic report making/dist/
-dynamic report making/*.json
 
 # Local agent/editor state
 .claude/

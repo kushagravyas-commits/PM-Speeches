@@ -1,6 +1,6 @@
 # PM Speeches
 
-Utilities for collecting Prime Minister speech transcript URLs from narendramodi.in, extracting speech text/media metadata, searching speeches by keyword, and generating downstream reports.
+Utilities for collecting Prime Minister speech transcript URLs from narendramodi.in, extracting speech text/media metadata, and searching/counting words across stored speeches.
 
 ## Main Workflows
 
@@ -8,7 +8,6 @@ Utilities for collecting Prime Minister speech transcript URLs from narendramodi
 - `extract_speech_mongodb.py` visits transcript URLs and stores speech title, date, text, images, videos, and tweets in MongoDB.
 - `word_search.py` searches stored speeches for a keyword and exports JSON/CSV results.
 - `scheduler.py` contains the older Prefect automation for scheduled extraction runs.
-- `report-making/src/run_pipeline.py` runs the report generation pipeline.
 
 ## Local Setup
 
@@ -16,7 +15,6 @@ Install dependencies:
 
 ```powershell
 pip install -r requirements.txt
-pip install -r report-making/requirements.txt
 playwright install chromium
 ```
 
